@@ -27,14 +27,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-# 中文字体配置（支持 GitHub Actions ubuntu-latest）
-font_path = os.environ.get('MATPLOTLIBRC_FONT', None)
-if font_path:
-    plt.rcParams['font.sans-serif'] = [font_path]
-else:
-    # 尝试常见中文字体
-    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'Noto Sans CJK SC', 'sans-serif']
-plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+# Chart text uses English only to avoid font/encoding issues across runners.
+plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Liberation Sans', 'sans-serif']
+plt.rcParams['axes.unicode_minus'] = False
 
 import akshare as ak
 
@@ -48,6 +43,7 @@ HISTORICAL_CSV = DATA_DIR / 'historical.csv'
 INDICES = {
     '000922': {
         'name': '中证红利',
+        'english_name': 'CSI Dividend',
         'symbol_legulegu': None,  # 乐咕乐股不支持
         'symbol_eastmoney': 'sh000922',
         'symbol_csindex': '000922',
@@ -55,6 +51,7 @@ INDICES = {
     },
     '000015': {
         'name': '上证红利',
+        'english_name': 'SSE Dividend',
         'symbol_legulegu': '上证红利',
         'symbol_eastmoney': 'sh000015',
         'symbol_csindex': '000015',
@@ -62,6 +59,7 @@ INDICES = {
     },
     '399324': {
         'name': '深证红利',
+        'english_name': 'SZSE Dividend',
         'symbol_legulegu': '深证红利',
         'symbol_eastmoney': 'sz399324',
         'symbol_csindex': '399324',
@@ -69,6 +67,7 @@ INDICES = {
     },
     'H30269': {
         'name': '红利低波',
+        'english_name': 'Dividend Low Vol',
         'symbol_legulegu': None,  # 乐咕乐股不支持
         'symbol_eastmoney': 'shH30269',
         'symbol_csindex': 'H30269',
@@ -331,20 +330,18 @@ def generate_charts(df):
         return
 
     CHARTS_DIR.mkdir(exist_ok=True)
-    plt.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS', 'DejaVu Sans']
-    plt.rcParams['axes.unicode_minus'] = False
 
     indices = df['index_code'].unique()
     colors = {'000922': '#1f77b4', '000015': '#ff7f0e', '399324': '#2ca02c', 'H30269': '#d62728'}
 
-    # 1. PE走势图
+    # 1. PE trend
     fig, ax = plt.subplots(figsize=(14, 6))
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pe_ttm'].notna())]
         if not sub.empty:
-            ax.plot(sub['date'], sub['pe_ttm'], label=INDICES[code]['name'], color=colors.get(code, '#333'), linewidth=1.5)
-    ax.set_title('红利指数 PE-TTM 走势', fontsize=14, fontweight='bold')
-    ax.set_xlabel('日期')
+            ax.plot(sub['date'], sub['pe_ttm'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+    ax.set_title('Dividend Index PE-TTM Trend', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Date')
     ax.set_ylabel('PE-TTM')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
@@ -354,14 +351,14 @@ def generate_charts(df):
     plt.close(fig)
     log(f"图表已保存: {CHARTS_DIR / 'pe_trend.png'}")
 
-    # 2. PB走势图
+    # 2. PB trend
     fig, ax = plt.subplots(figsize=(14, 6))
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pb'].notna())]
         if not sub.empty:
-            ax.plot(sub['date'], sub['pb'], label=INDICES[code]['name'], color=colors.get(code, '#333'), linewidth=1.5)
-    ax.set_title('红利指数 PB 走势', fontsize=14, fontweight='bold')
-    ax.set_xlabel('日期')
+            ax.plot(sub['date'], sub['pb'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+    ax.set_title('Dividend Index PB Trend', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Date')
     ax.set_ylabel('PB')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
@@ -371,15 +368,15 @@ def generate_charts(df):
     plt.close(fig)
     log(f"图表已保存: {CHARTS_DIR / 'pb_trend.png'}")
 
-    # 3. 股息率走势图
+    # 3. Dividend yield trend
     fig, ax = plt.subplots(figsize=(14, 6))
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna())]
         if not sub.empty:
-            ax.plot(sub['date'], sub['dividend_yield'], label=INDICES[code]['name'], color=colors.get(code, '#333'), linewidth=1.5)
-    ax.set_title('红利指数 股息率 走势', fontsize=14, fontweight='bold')
-    ax.set_xlabel('日期')
-    ax.set_ylabel('股息率 (%)')
+            ax.plot(sub['date'], sub['dividend_yield'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+    ax.set_title('Dividend Yield Trend', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Dividend Yield (%)')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
@@ -388,18 +385,18 @@ def generate_charts(df):
     plt.close(fig)
     log(f"图表已保存: {CHARTS_DIR / 'dividend_yield_trend.png'}")
 
-    # 4. 股息率/国债收益率 利差图
+    # 4. Dividend yield / bond yield spread
     fig, ax = plt.subplots(figsize=(14, 6))
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna()) & (df['bond_yield'].notna())]
         if not sub.empty:
             ratio = sub['dividend_yield'] / sub['bond_yield']
-            ax.plot(sub['date'], ratio, label=INDICES[code]['name'], color=colors.get(code, '#333'), linewidth=1.5)
-    ax.axhline(y=2.5, color='green', linestyle='--', alpha=0.5, label='配置价值线(2.5x)')
-    ax.axhline(y=1.5, color='red', linestyle='--', alpha=0.5, label='机会成本高(1.5x)')
-    ax.set_title('股息率 / 10Y国债收益率 利差', fontsize=14, fontweight='bold')
-    ax.set_xlabel('日期')
-    ax.set_ylabel('倍数')
+            ax.plot(sub['date'], ratio, label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+    ax.axhline(y=2.5, color='green', linestyle='--', alpha=0.5, label='Value Line (2.5x)')
+    ax.axhline(y=1.5, color='red', linestyle='--', alpha=0.5, label='Low Attractiveness (1.5x)')
+    ax.set_title('Dividend Yield / 10Y Bond Yield', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Multiple')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
@@ -408,7 +405,7 @@ def generate_charts(df):
     plt.close(fig)
     log(f"图表已保存: {CHARTS_DIR / 'dy_bond_spread.png'}")
 
-    # 5. 估值分位数热力图（最新数据）
+    # 5. Latest valuation summary
     latest_data = []
     for code in indices:
         sub = df[df['index_code'] == code]
@@ -421,19 +418,20 @@ def generate_charts(df):
             pb_pct = (pb_hist.rank(pct=True).iloc[-1] * 100) if len(pb_hist) > 30 else None
             dy_pct = ((1 - dy_hist.rank(pct=True).iloc[-1]) * 100) if len(dy_hist) > 30 else None
             latest_data.append({
-                'index': INDICES[code]['name'],
-                'PE分位': f"{pe_pct:.1f}%" if pe_pct else 'N/A',
-                'PB分位': f"{pb_pct:.1f}%" if pb_pct else 'N/A',
-                '股息率分位': f"{dy_pct:.1f}%" if dy_pct else 'N/A',
-                '当前PE': f"{latest['pe_ttm']:.2f}" if pd.notna(latest['pe_ttm']) else 'N/A',
-                '当前PB': f"{latest['pb']:.2f}" if pd.notna(latest['pb']) else 'N/A',
-                '当前DY': f"{latest['dividend_yield']:.2f}%" if pd.notna(latest['dividend_yield']) else 'N/A',
+                'Index': INDICES[code].get('english_name', INDICES[code]['name']),
+                'PE Pctl': f"{pe_pct:.1f}%" if pe_pct else 'N/A',
+                'PB Pctl': f"{pb_pct:.1f}%" if pb_pct else 'N/A',
+                'DY Pctl': f"{dy_pct:.1f}%" if dy_pct else 'N/A',
+                'PE': f"{latest['pe_ttm']:.2f}" if pd.notna(latest['pe_ttm']) else 'N/A',
+                'PB': f"{latest['pb']:.2f}" if pd.notna(latest['pb']) else 'N/A',
+                'DY': f"{latest['dividend_yield']:.2f}%" if pd.notna(latest['dividend_yield']) else 'N/A',
             })
 
     if latest_data:
         latest_df = pd.DataFrame(latest_data)
         fig, ax = plt.subplots(figsize=(12, 4))
         ax.axis('off')
+        fig.suptitle('Latest Valuation Summary', fontsize=14, fontweight='bold', y=0.98)
         table = ax.table(cellText=latest_df.values, colLabels=latest_df.columns, cellLoc='center', loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)
