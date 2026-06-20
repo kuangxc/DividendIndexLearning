@@ -26,6 +26,16 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+# 中文字体配置（支持 GitHub Actions ubuntu-latest）
+font_path = os.environ.get('MATPLOTLIBRC_FONT', None)
+if font_path:
+    plt.rcParams['font.sans-serif'] = [font_path]
+else:
+    # 尝试常见中文字体
+    plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei', 'Noto Sans CJK SC', 'sans-serif']
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+
 import akshare as ak
 
 # 配置
