@@ -97,6 +97,30 @@ def load_existing_data():
         ])
 
 
+def configure_date_axis(ax, dates):
+    """按时间跨度自适应设置横轴，避免月标签重复"""
+    valid_dates = pd.to_datetime(pd.Series(dates).dropna())
+    if valid_dates.empty:
+        return
+
+    min_date = valid_dates.min()
+    max_date = valid_dates.max()
+    span_days = max((max_date - min_date).days, 1)
+
+    if span_days <= 120:
+        locator = mdates.AutoDateLocator(minticks=5, maxticks=8)
+        formatter = mdates.ConciseDateFormatter(locator)
+    else:
+        months_span = max(int(span_days / 30), 1)
+        interval = max(1, (months_span + 7) // 8)
+        locator = mdates.MonthLocator(interval=interval)
+        formatter = mdates.DateFormatter('%Y-%m')
+
+    ax.set_xlim(min_date, max_date)
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+
+
 def fetch_eastmoney_history(symbol, start_date, end_date):
     """从东方财富获取指数历史行情（备选）"""
     try:
@@ -336,16 +360,19 @@ def generate_charts(df):
 
     # 1. PE trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pe_ttm'].notna())]
         if not sub.empty:
             ax.plot(sub['date'], sub['pe_ttm'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+            plotted_dates.append(sub['date'])
     ax.set_title('Dividend Index PE-TTM Trend', fontsize=14, fontweight='bold')
     ax.set_xlabel('Date')
     ax.set_ylabel('PE-TTM')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    if plotted_dates:
+        configure_date_axis(ax, pd.concat(plotted_dates, ignore_index=True))
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'pe_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -353,16 +380,19 @@ def generate_charts(df):
 
     # 2. PB trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pb'].notna())]
         if not sub.empty:
             ax.plot(sub['date'], sub['pb'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+            plotted_dates.append(sub['date'])
     ax.set_title('Dividend Index PB Trend', fontsize=14, fontweight='bold')
     ax.set_xlabel('Date')
     ax.set_ylabel('PB')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    if plotted_dates:
+        configure_date_axis(ax, pd.concat(plotted_dates, ignore_index=True))
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'pb_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -370,16 +400,19 @@ def generate_charts(df):
 
     # 3. Dividend yield trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna())]
         if not sub.empty:
             ax.plot(sub['date'], sub['dividend_yield'], label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+            plotted_dates.append(sub['date'])
     ax.set_title('Dividend Yield Trend', fontsize=14, fontweight='bold')
     ax.set_xlabel('Date')
     ax.set_ylabel('Dividend Yield (%)')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    if plotted_dates:
+        configure_date_axis(ax, pd.concat(plotted_dates, ignore_index=True))
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'dividend_yield_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -387,11 +420,13 @@ def generate_charts(df):
 
     # 4. Dividend yield / bond yield spread
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna()) & (df['bond_yield'].notna())]
         if not sub.empty:
             ratio = sub['dividend_yield'] / sub['bond_yield']
             ax.plot(sub['date'], ratio, label=INDICES[code].get('english_name', INDICES[code]['name']), color=colors.get(code, '#333'), linewidth=1.5)
+            plotted_dates.append(sub['date'])
     ax.axhline(y=2.5, color='green', linestyle='--', alpha=0.5, label='Value Line (2.5x)')
     ax.axhline(y=1.5, color='red', linestyle='--', alpha=0.5, label='Low Attractiveness (1.5x)')
     ax.set_title('Dividend Yield / 10Y Bond Yield', fontsize=14, fontweight='bold')
@@ -399,7 +434,8 @@ def generate_charts(df):
     ax.set_ylabel('Multiple')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    if plotted_dates:
+        configure_date_axis(ax, pd.concat(plotted_dates, ignore_index=True))
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'dy_bond_spread.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
