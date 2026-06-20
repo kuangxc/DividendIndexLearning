@@ -280,7 +280,7 @@ def build_index_data(index_code, cfg, start_date, end_date, bond_yield):
 
 
 def update_historical_data(backfill=False):
-    """更新历史数据"""
+    """更新历史数据，返回(数据框, 是否有新增数据)"""
     today = datetime.now().strftime('%Y-%m-%d')
     existing_df = load_existing_data()
 
@@ -307,7 +307,7 @@ def update_historical_data(backfill=False):
 
     if not all_new_data:
         log("没有新数据需要更新")
-        return existing_df
+        return existing_df, False
 
     new_df = pd.concat(all_new_data, ignore_index=True)
 
@@ -321,7 +321,7 @@ def update_historical_data(backfill=False):
     combined = combined.sort_values(['index_code', 'date'])
     combined.to_csv(HISTORICAL_CSV, index=False)
     log(f"历史数据已保存: {HISTORICAL_CSV} ({len(combined)} 行)")
-    return combined
+    return combined, True
 
 
 def generate_charts(df):
@@ -457,8 +457,11 @@ def main():
         df = load_existing_data()
         generate_charts(df)
     else:
-        df = update_historical_data(backfill=args.backfill)
-        generate_charts(df)
+        df, has_new_data = update_historical_data(backfill=args.backfill)
+        if args.backfill or has_new_data:
+            generate_charts(df)
+        else:
+            log("没有新增数据，跳过图表生成")
 
     log("完成")
 
