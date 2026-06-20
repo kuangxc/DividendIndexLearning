@@ -2,7 +2,7 @@ name: Update Dividend Index Data
 
 on:
   schedule:
-    - cron: '0 16 * * 5'  # 每周五北京时间16:00（收盘后）
+    - cron: '0 10 * * 1-5'  # 工作日每天北京时间18:00（收盘后，避免数据尚未刷新）
   workflow_dispatch:        # 支持手动触发
 
 permissions:
