@@ -18,10 +18,12 @@ import os
 import sys
 import argparse
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
+import requests
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -77,6 +79,9 @@ INDICES = {
 
 # 国债收益率默认值
 BOND_YIELD_DEFAULT = 1.8
+
+# 红利查支持的指数详情页，可补足近三个月的 DP2/PE2 数据
+HONG_LI_CHA_SUPPORTED = {'000922', '000015', 'H30269'}
 
 
 def log(msg):
@@ -202,14 +207,15 @@ def fetch_csindex_history(symbol, start_date, end_date):
 
 
 def fetch_csindex_valuation(symbol, start_date, end_date):
-    """从中证指数获取PE/股息率"""
+    """从中证指数获取PE/股息率，优先使用股息率2（计算用股本）"""
     try:
         df = ak.stock_zh_index_value_csindex(symbol=symbol)
+        dividend_col = '股息率2' if '股息率2' in df.columns else '股息率1'
         df = df.rename(columns={
             '日期': 'date',
             '市盈率1': 'pe_static',
             '市盈率2': 'pe_ttm',
-            '股息率1': 'dividend_yield',
+            dividend_col: 'dividend_yield',
         })[['date', 'pe_static', 'pe_ttm', 'dividend_yield']]
         df['date'] = pd.to_datetime(df['date'])
         df['dividend_yield'] = pd.to_numeric(df['dividend_yield'], errors='coerce')
@@ -220,24 +226,138 @@ def fetch_csindex_valuation(symbol, start_date, end_date):
         return None
 
 
-def fetch_bond_yield():
-    """获取10年期国债收益率"""
+def extract_json_object(text, start_pos):
+    """从指定位置提取一个完整的 JSON 对象字符串"""
+    depth = 0
+    in_string = False
+    escape = False
+
+    for idx in range(start_pos, len(text)):
+        ch = text[idx]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+
+        if ch == '"':
+            in_string = True
+        elif ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start_pos:idx + 1], idx + 1
+
+    raise ValueError('未找到完整 JSON 对象')
+
+
+def parse_honglicha_charts(html):
+    """解析红利查详情页中内嵌的 ECharts 数据"""
+    start = html.find('var chartsData = [')
+    if start == -1:
+        return []
+
+    end = html.find('window.initDetailCharts(chartsData);', start)
+    if end == -1:
+        return []
+
+    block = html[start:end]
+    charts = []
+    pos = 0
+
+    while True:
+        match = re.search(r"id:\s*'([^']+)'\s*,\s*option:\s*", block[pos:])
+        if not match:
+            break
+        chart_id = match.group(1)
+        option_start = pos + match.end()
+        brace_start = block.find('{', option_start)
+        if brace_start == -1:
+            break
+        option_json, next_pos = extract_json_object(block, brace_start)
+        charts.append({'id': chart_id, 'option': json.loads(option_json)})
+        pos = next_pos
+
+    return charts
+
+
+def fetch_honglicha_valuation(symbol, start_date, end_date):
+    """从红利查补充近三个月的 DP2/PE2 历史数据"""
+    if symbol not in HONG_LI_CHA_SUPPORTED:
+        return None
+
     try:
-        # 尝试akshare的债券接口
-        for func_name in ['bond_zh_yield', 'bond_china_yield']:
-            if hasattr(ak, func_name):
-                func = getattr(ak, func_name)
-                df = func(start_date=(datetime.now() - timedelta(days=30)).strftime('%Y%m%d'),
-                         end_date=datetime.now().strftime('%Y%m%d'))
-                if '国债收益率10年' in df.columns:
-                    latest = df['国债收益率10年'].dropna().iloc[-1]
-                    return float(latest)
+        resp = requests.get(f'https://honglicha.com/{symbol}/', timeout=20, headers={'User-Agent': 'Mozilla/5.0'})
+        resp.raise_for_status()
+        charts = parse_honglicha_charts(resp.text)
+        if len(charts) < 2:
+            return None
+
+        dp_chart = next((item for item in charts if item['id'] == 'chart_0'), None)
+        pe_chart = next((item for item in charts if item['id'] == 'chart_1'), None)
+        if not dp_chart:
+            return None
+
+        dates = pd.to_datetime(dp_chart['option']['xAxis']['data'])
+        dp_series = {series['name']: series['data'] for series in dp_chart['option']['series']}
+        pe_series = {series['name']: series['data'] for series in pe_chart['option']['series']} if pe_chart else {}
+
+        df = pd.DataFrame({
+            'date': dates,
+            'dividend_yield': dp_series.get('DP2（计算用股本）') or dp_series.get('DP1（总股本）'),
+            'pe_ttm': pe_series.get('PE2（计算用股本）'),
+        })
+        df['dividend_yield'] = pd.to_numeric(df['dividend_yield'], errors='coerce')
+        df['pe_ttm'] = pd.to_numeric(df['pe_ttm'], errors='coerce')
+        mask = (df['date'] >= pd.to_datetime(start_date)) & (df['date'] <= pd.to_datetime(end_date))
+        return df.loc[mask, ['date', 'pe_ttm', 'dividend_yield']].copy()
     except Exception as e:
-        log(f"  国债收益率获取失败: {e}")
-    return BOND_YIELD_DEFAULT
+        log(f"  红利查估值补充失败 {symbol}: {e}")
+        return None
 
 
-def build_index_data(index_code, cfg, start_date, end_date, bond_yield):
+def fetch_bond_yield_history(start_date, end_date):
+    """获取10年期国债收益率历史序列；按年度分块抓取，避免单次区间过长返回空数据"""
+    try:
+        if hasattr(ak, 'bond_china_yield'):
+            start_ts = pd.to_datetime(start_date)
+            end_ts = pd.to_datetime(end_date)
+            frames = []
+            cursor = start_ts
+
+            while cursor <= end_ts:
+                chunk_end = min(cursor + pd.Timedelta(days=364), end_ts)
+                chunk = ak.bond_china_yield(
+                    start_date=cursor.strftime('%Y%m%d'),
+                    end_date=chunk_end.strftime('%Y%m%d')
+                )
+                if chunk is not None and not chunk.empty:
+                    frames.append(chunk)
+                cursor = chunk_end + pd.Timedelta(days=1)
+
+            if not frames:
+                return pd.DataFrame(columns=['date', 'bond_yield'])
+
+            df = pd.concat(frames, ignore_index=True)
+            df = df[df['曲线名称'].astype(str).str.contains('国债收益率曲线', na=False)].copy()
+            if df.empty:
+                return pd.DataFrame(columns=['date', 'bond_yield'])
+            df = df.rename(columns={'日期': 'date', '10年': 'bond_yield'})[['date', 'bond_yield']]
+            df['date'] = pd.to_datetime(df['date'])
+            df['bond_yield'] = pd.to_numeric(df['bond_yield'], errors='coerce')
+            df = df.dropna(subset=['bond_yield']).drop_duplicates(subset=['date'], keep='last')
+            return df.sort_values('date').reset_index(drop=True)
+    except Exception as e:
+        log(f"  国债收益率历史获取失败: {e}")
+
+    return pd.DataFrame(columns=['date', 'bond_yield'])
+
+
+def build_index_data(index_code, cfg, start_date, end_date, bond_yield_df):
     """为单个指数构建数据，多源合并，自动降级"""
     log(f"处理指数: {index_code} {cfg['name']}")
     records = []
@@ -281,6 +401,12 @@ def build_index_data(index_code, cfg, start_date, end_date, bond_yield):
         records.append(cs_df)
         log(f"  中证估值: {len(cs_df)} 行")
 
+    # 5. 红利查补充近三个月的 DP2/PE2，解决中证导出仅保留近 20 个交易日的问题
+    honglicha_df = fetch_honglicha_valuation(index_code, start_date, end_date)
+    if honglicha_df is not None and not honglicha_df.empty:
+        records.append(honglicha_df)
+        log(f"  红利查估值补充: {len(honglicha_df)} 行")
+
     # 合并所有数据，处理重叠列（优先取非空值）
     merged = records[0]
     for r in records[1:]:
@@ -297,9 +423,14 @@ def build_index_data(index_code, cfg, start_date, end_date, bond_yield):
             merged = merged.merge(r, on='date', how='outer')
 
     merged = merged.sort_values('date')
+    if bond_yield_df is not None and not bond_yield_df.empty:
+        merged = merged.merge(bond_yield_df, on='date', how='left')
+        merged['bond_yield'] = merged['bond_yield'].fillna(BOND_YIELD_DEFAULT)
+    else:
+        merged['bond_yield'] = BOND_YIELD_DEFAULT
+
     merged['index_code'] = index_code
     merged['index_name'] = cfg['name']
-    merged['bond_yield'] = bond_yield
 
     # 选择最终列
     cols = ['date', 'index_code', 'index_name', 'close', 'pe_ttm', 'pe_static', 'pb', 'dividend_yield', 'bond_yield']
@@ -316,8 +447,13 @@ def update_historical_data(backfill=False):
     existing_df = load_existing_data()
 
     all_new_data = []
-    bond_yield = fetch_bond_yield()
-    log(f"当前10Y国债收益率: {bond_yield}%")
+    global_start = min(cfg['start_date'] for cfg in INDICES.values())
+    bond_yield_df = fetch_bond_yield_history(global_start, today)
+    if not bond_yield_df.empty:
+        latest_bond = bond_yield_df['bond_yield'].dropna().iloc[-1]
+        log(f"当前10Y国债收益率: {latest_bond}% (历史 {len(bond_yield_df)} 行)")
+    else:
+        log(f"当前10Y国债收益率获取失败，回退默认值 {BOND_YIELD_DEFAULT}%")
 
     for code, cfg in INDICES.items():
         if backfill:
@@ -332,7 +468,7 @@ def update_historical_data(backfill=False):
             else:
                 start = cfg['start_date']
 
-        df = build_index_data(code, cfg, start, today, bond_yield)
+        df = build_index_data(code, cfg, start, today, bond_yield_df)
         if not df.empty:
             all_new_data.append(df)
 
