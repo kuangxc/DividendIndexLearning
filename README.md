@@ -26,6 +26,15 @@
 ├── brokers.md             # 券商与交易渠道选择
 ├── tax.md                 # 税务与合规笔记
 ├── portfolio.md           # 持仓记录与定投执行
+├── data.md                # 数据说明与自动采集方案
+├── data/                  # 估值历史数据（自动采集）
+│   └── historical.csv
+├── charts/                # 估值趋势图表（自动生成）
+│   ├── pe_trend.png
+│   ├── pb_trend.png
+│   ├── dividend_yield_trend.png
+│   ├── dy_bond_spread.png
+│   └── latest_valuation_summary.png
 └── notes/                # 每日碎片记录与复盘
     └── YYYY-MM-DD.md
 ```
