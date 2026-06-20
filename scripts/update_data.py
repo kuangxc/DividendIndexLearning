@@ -365,13 +365,14 @@ def generate_charts(df):
 
     indices = df['index_code'].unique()
     colors = {'000922': '#1f77b4', '000015': '#ff7f0e', '399324': '#2ca02c', 'H30269': '#d62728'}
-    axis_dates = df['date']
 
     # 1. PE trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pe_ttm'].notna())]
         if not sub.empty:
+            plotted_dates.extend(sub['date'].tolist())
             ax.plot(
                 sub['date'], sub['pe_ttm'],
                 label=INDICES[code].get('english_name', INDICES[code]['name']),
@@ -383,7 +384,7 @@ def generate_charts(df):
     ax.set_ylabel('PE-TTM')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    format_date_axis(ax, axis_dates)
+    format_date_axis(ax, plotted_dates)
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'pe_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -391,9 +392,11 @@ def generate_charts(df):
 
     # 2. PB trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['pb'].notna())]
         if not sub.empty:
+            plotted_dates.extend(sub['date'].tolist())
             ax.plot(
                 sub['date'], sub['pb'],
                 label=INDICES[code].get('english_name', INDICES[code]['name']),
@@ -405,7 +408,7 @@ def generate_charts(df):
     ax.set_ylabel('PB')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    format_date_axis(ax, axis_dates)
+    format_date_axis(ax, plotted_dates)
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'pb_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -413,9 +416,11 @@ def generate_charts(df):
 
     # 3. Dividend yield trend
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna())]
         if not sub.empty:
+            plotted_dates.extend(sub['date'].tolist())
             ax.plot(
                 sub['date'], sub['dividend_yield'],
                 label=INDICES[code].get('english_name', INDICES[code]['name']),
@@ -427,7 +432,7 @@ def generate_charts(df):
     ax.set_ylabel('Dividend Yield (%)')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    format_date_axis(ax, axis_dates)
+    format_date_axis(ax, plotted_dates)
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'dividend_yield_trend.png', dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -435,9 +440,11 @@ def generate_charts(df):
 
     # 4. Dividend yield / bond yield spread
     fig, ax = plt.subplots(figsize=(14, 6))
+    plotted_dates = []
     for code in indices:
         sub = df[(df['index_code'] == code) & (df['dividend_yield'].notna()) & (df['bond_yield'].notna())]
         if not sub.empty:
+            plotted_dates.extend(sub['date'].tolist())
             ratio = sub['dividend_yield'] / sub['bond_yield']
             ax.plot(
                 sub['date'], ratio,
@@ -452,7 +459,7 @@ def generate_charts(df):
     ax.set_ylabel('Multiple')
     ax.legend(loc='upper left')
     ax.grid(True, alpha=0.3)
-    format_date_axis(ax, axis_dates)
+    format_date_axis(ax, plotted_dates)
     fig.autofmt_xdate()
     fig.savefig(CHARTS_DIR / 'dy_bond_spread.png', dpi=150, bbox_inches='tight')
     plt.close(fig)

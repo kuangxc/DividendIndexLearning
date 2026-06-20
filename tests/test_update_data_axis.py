@@ -10,7 +10,6 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
 
@@ -51,31 +50,22 @@ class TestDateAxisFormatting(unittest.TestCase):
         finally:
             plt.close(fig)
 
-    def test_full_history_range_is_preserved(self):
-        full_history_dates = [
-            datetime(2020, 1, 1),
-            datetime(2026, 6, 18),
-        ]
-        recent_metric_dates = [
+    def test_recent_metric_range_does_not_repeat_month_labels(self):
+        dates = [
             datetime(2026, 5, 22),
             datetime(2026, 6, 18),
         ]
 
         fig, ax = plt.subplots(figsize=(14, 6))
         try:
-            ax.plot(recent_metric_dates, [4.3, 5.1])
-            self.update_data.format_date_axis(ax, full_history_dates)
+            ax.plot(dates, [4.3, 5.1])
+            self.update_data.format_date_axis(ax, dates)
             fig.canvas.draw()
 
-            min_xlim, max_xlim = ax.get_xlim()
-            min_date = mdates.num2date(min_xlim).replace(tzinfo=None)
-            max_date = mdates.num2date(max_xlim).replace(tzinfo=None)
             labels = [tick.get_text() for tick in ax.get_xticklabels() if tick.get_text()]
 
-            self.assertLessEqual(min_date.date(), datetime(2020, 1, 1).date())
-            self.assertGreaterEqual(max_date.date(), datetime(2026, 6, 18).date())
-            self.assertIn("2020-01", labels)
-            self.assertIn("2026-01", labels)
+            self.assertEqual(labels, list(dict.fromkeys(labels)))
+            self.assertTrue(all(label.startswith("2026-") for label in labels))
         finally:
             plt.close(fig)
 
