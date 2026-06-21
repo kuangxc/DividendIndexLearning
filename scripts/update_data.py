@@ -613,6 +613,13 @@ def generate_charts(df):
             pe_pct = (pe_hist.rank(pct=True).iloc[-1] * 100) if len(pe_hist) > 30 else None
             pb_pct = (pb_hist.rank(pct=True).iloc[-1] * 100) if len(pb_hist) > 30 else None
             dy_pct = ((1 - dy_hist.rank(pct=True).iloc[-1]) * 100) if len(dy_hist) > 30 else None
+            
+            # Calculate spread and ratio
+            dy = latest['dividend_yield']
+            bond = latest['bond_yield']
+            has_dy = pd.notna(dy)
+            has_bond = pd.notna(bond)
+            
             latest_data.append({
                 'Index': INDICES[code].get('english_name', INDICES[code]['name']),
                 'PE Pctl': f"{pe_pct:.1f}%" if pe_pct else 'N/A',
@@ -620,7 +627,10 @@ def generate_charts(df):
                 'DY Pctl': f"{dy_pct:.1f}%" if dy_pct else 'N/A',
                 'PE': f"{latest['pe_ttm']:.2f}" if pd.notna(latest['pe_ttm']) else 'N/A',
                 'PB': f"{latest['pb']:.2f}" if pd.notna(latest['pb']) else 'N/A',
-                'DY': f"{latest['dividend_yield']:.2f}%" if pd.notna(latest['dividend_yield']) else 'N/A',
+                'DY': f"{dy:.2f}%" if has_dy else 'N/A',
+                'Bond': f"{bond:.2f}%" if has_bond else 'N/A',
+                'Spread': f"{dy - bond:.2f}pp" if has_dy and has_bond else 'N/A',
+                'DY/Bond': f"{dy / bond:.2f}" if has_dy and has_bond and bond != 0 else 'N/A',
             })
 
     if latest_data:
