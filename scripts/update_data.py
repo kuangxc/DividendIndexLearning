@@ -668,9 +668,16 @@ def generate_charts(df):
 
     if latest_data:
         latest_df = pd.DataFrame(latest_data)
+        # Get the latest date across all indices (use the max date from df)
+        max_date = df['date'].max()
+        if hasattr(max_date, 'strftime'):
+            date_str = max_date.strftime('%Y-%m-%d')
+        else:
+            date_str = str(max_date)
+        
         fig, ax = plt.subplots(figsize=(14, 4))
         ax.axis('off')
-        fig.suptitle('Latest Valuation Summary', fontsize=14, fontweight='bold', y=0.98)
+        fig.suptitle(f'Latest Valuation Summary (Data: {date_str})', fontsize=14, fontweight='bold', y=0.98)
         table = ax.table(cellText=latest_df.values, colLabels=latest_df.columns,
                         cellLoc='center', loc='center')
         table.auto_set_font_size(False)
