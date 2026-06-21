@@ -603,7 +603,8 @@ def generate_charts(df):
 
     # 5. Latest valuation summary
     latest_data = []
-    for code in indices:
+    cell_colors = []  # [(row, col, color), ...]
+    for i, code in enumerate(indices):
         sub = df[df['index_code'] == code]
         if not sub.empty:
             latest = sub.iloc[-1]
@@ -614,6 +615,35 @@ def generate_charts(df):
             pb_pct = (pb_hist.rank(pct=True).iloc[-1] * 100) if len(pb_hist) > 30 else None
             dy_pct = ((1 - dy_hist.rank(pct=True).iloc[-1]) * 100) if len(dy_hist) > 30 else None
             
+            # Format with >/< symbol and color
+            # PE/PB: lower is better; >N% means "higher than N% of history"
+            # DY: higher is better; >N% means "higher than N% of history"
+            def _fmt_pct(pct, lower_is_better=True):
+                if pct is None:
+                    return 'N/A', 'white'
+                # >pct% means current value is higher than pct% of history
+                val_str = f">{pct:.0f}%"
+                if lower_is_better:
+                    # PE/PB: low pct = cheap = green; high pct = expensive = red
+                    if pct <= 30:
+                        return val_str, '#c6efce'  # green
+                    elif pct >= 70:
+                        return val_str, '#ffc7ce'  # red
+                    else:
+                        return val_str, '#ffeb9c'  # yellow
+                else:
+                    # DY: high pct = high dividend yield = cheap = green
+                    if pct >= 70:
+                        return val_str, '#c6efce'  # green
+                    elif pct <= 30:
+                        return val_str, '#ffc7ce'  # red
+                    else:
+                        return val_str, '#ffeb9c'  # yellow
+            
+            pe_str, pe_color = _fmt_pct(pe_pct, lower_is_better=True)
+            pb_str, pb_color = _fmt_pct(pb_pct, lower_is_better=True)
+            dy_str, dy_color = _fmt_pct(dy_pct, lower_is_better=False)
+            
             # Calculate spread and ratio
             dy = latest['dividend_yield']
             bond = latest['bond_yield']
@@ -622,9 +652,9 @@ def generate_charts(df):
             
             latest_data.append({
                 'Index': INDICES[code].get('english_name', INDICES[code]['name']),
-                'PE Pctl': f"{pe_pct:.1f}%" if pe_pct else 'N/A',
-                'PB Pctl': f"{pb_pct:.1f}%" if pb_pct else 'N/A',
-                'DY Pctl': f"{dy_pct:.1f}%" if dy_pct else 'N/A',
+                'PE Pctl': pe_str,
+                'PB Pctl': pb_str,
+                'DY Pctl': dy_str,
                 'PE': f"{latest['pe_ttm']:.2f}" if pd.notna(latest['pe_ttm']) else 'N/A',
                 'PB': f"{latest['pb']:.2f}" if pd.notna(latest['pb']) else 'N/A',
                 'DY': f"{dy:.2f}%" if has_dy else 'N/A',
@@ -632,16 +662,25 @@ def generate_charts(df):
                 'Spread': f"{dy - bond:.2f}pp" if has_dy and has_bond else 'N/A',
                 'DY/Bond': f"{dy / bond:.2f}" if has_dy and has_bond and bond != 0 else 'N/A',
             })
+            # Store colors for table cells: (row, col, color)
+            for col_offset, color in [(1, pe_color), (2, pb_color), (3, dy_color)]:
+                cell_colors.append((i, col_offset, color))
 
     if latest_data:
         latest_df = pd.DataFrame(latest_data)
-        fig, ax = plt.subplots(figsize=(12, 4))
+        fig, ax = plt.subplots(figsize=(14, 4))
         ax.axis('off')
         fig.suptitle('Latest Valuation Summary', fontsize=14, fontweight='bold', y=0.98)
-        table = ax.table(cellText=latest_df.values, colLabels=latest_df.columns, cellLoc='center', loc='center')
+        table = ax.table(cellText=latest_df.values, colLabels=latest_df.columns,
+                        cellLoc='center', loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)
-        table.scale(1.2, 1.8)
+        table.scale(1.4, 2.0)
+        # Apply cell colors
+        for row, col, color in cell_colors:
+            cell = table.get_celld().get((row + 1, col))
+            if cell:
+                cell.set_facecolor(color)
         fig.savefig(CHARTS_DIR / 'latest_valuation_summary.png', dpi=150, bbox_inches='tight')
         plt.close(fig)
         log(f"图表已保存: {CHARTS_DIR / 'latest_valuation_summary.png'}")
