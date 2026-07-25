@@ -1,0 +1,173 @@
+<div class="report-shell">
+  <style>
+    :root{--ink:#172033;--muted:#667085;--line:#e5e7eb;--paper:#f6f8fb;--card:#ffffff;--red:#c62828;--red-soft:#fff0f0;--green:#17823b;--green-soft:#ecf9f0;--gold:#b7791f;--blue:#2457a7;--purple:#6b46c1}
+    *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    .report-shell{max-width:1180px;margin:0 auto;padding:30px 22px 54px;background:var(--paper)}
+    .hero{background:linear-gradient(135deg,#fff 0%,#f1f5ff 100%);border:1px solid #dfe7f5;border-radius:18px;padding:28px 30px;box-shadow:0 8px 28px rgba(35,55,90,.08)}
+    h1{font-size:30px;margin:0 0 8px;letter-spacing:-.4px}.sub{color:var(--muted);font-size:14px}.verdict{margin-top:18px;padding:16px 18px;border-left:5px solid var(--red);background:#fff;border-radius:10px;font-size:17px;line-height:1.65;font-weight:650}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px}.kpi .name{font-size:13px;color:var(--muted)}.kpi .val{font-size:25px;font-weight:750;margin:4px 0}.up{color:var(--red)}.down{color:var(--green)}.kpi .note{font-size:12px;color:var(--muted)}
+    .section{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:0 4px 18px rgba(25,38,63,.04)}
+    h2{font-size:21px;margin:0 0 14px}h3{font-size:16px;margin:18px 0 8px}.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}.chart{height:365px;width:100%}.small-chart{height:340px;width:100%}
+    table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:right}th{color:#475467;background:#f8fafc;font-weight:650}th:first-child,td:first-child{text-align:left}.tag{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:650}.tag-red{background:var(--red-soft);color:var(--red)}.tag-gold{background:#fff7df;color:#8a5a00}.tag-blue{background:#edf4ff;color:var(--blue)}
+    .phase{display:grid;grid-template-columns:1fr 1fr;gap:14px}.phase-card{border:1px solid var(--line);border-radius:12px;padding:16px}.phase-card strong{display:block;margin-bottom:7px}.phase-card p{margin:0;color:#475467;line-height:1.65;font-size:14px}
+    .drivers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.driver{border:1px solid var(--line);border-radius:12px;padding:15px}.driver b{font-size:15px}.driver p{margin:7px 0 0;color:#475467;font-size:14px;line-height:1.65}
+    .signal{display:grid;grid-template-columns:140px 1fr 120px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.signal:last-child{border-bottom:0}.status{font-weight:700}.status-good{color:var(--red)}.status-watch{color:var(--gold)}
+    .sources{font-size:12px;color:var(--muted);line-height:1.7}.sources a{color:var(--blue);text-decoration:none}.sources a:hover{text-decoration:underline}.callout{padding:14px 16px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);line-height:1.65;color:#344054}.risk{background:#fff8eb;border-color:#f1d49a}
+    @media(max-width:850px){.kpis,.drivers,.phase,.grid2{grid-template-columns:1fr}.signal{grid-template-columns:1fr}.chart,.small-chart{height:320px}}
+  </style>
+
+  <section class="hero">
+    <h1>红利指数最近两周复盘</h1>
+    <div class="sub">观察窗口：2026-07-10 收盘 → 2026-07-24 收盘｜截至 2026-07-25（周六休市）</div>
+    <div class="verdict">结论：这两周不是单纯的“超跌反弹”，而是经历了<strong>第一周防御切换、第二周资源扩散</strong>的两阶段修复。四个红利指数均跑赢沪深300，但行情仍高度依赖银行、煤炭和石油石化；估值安全垫在上涨后有所收窄，暂不适合把短期修复外推成新一轮单边主升。</div>
+    <div class="kpis">
+      <div class="kpi"><div class="name">上证红利</div><div class="val up">+5.42%</div><div class="note">四个指数中最强</div></div>
+      <div class="kpi"><div class="name">红利低波</div><div class="val up">+4.34%</div><div class="note">第一周防守属性最突出</div></div>
+      <div class="kpi"><div class="name">中证红利</div><div class="val up">+4.25%</div><div class="note">资源权重提供弹性</div></div>
+      <div class="kpi"><div class="name">沪深300</div><div class="val down">-2.75%</div><div class="note">红利取得显著相对收益</div></div>
+    </div>
+  </section>
+
+  <section class="section grid2">
+    <div>
+      <h2>双周累计表现</h2>
+      <div id="returnChart" class="small-chart"></div>
+    </div>
+    <div>
+      <h2>精确数据与相对收益</h2>
+      <table>
+        <thead><tr><th>指数</th><th>双周</th><th>第1周</th><th>第2周</th><th>超额/沪深300</th></tr></thead>
+        <tbody>
+          <tr><td>上证红利</td><td class="up">+5.42%</td><td class="up">+2.71%</td><td class="up">+2.63%</td><td class="up">+8.17pp</td></tr>
+          <tr><td>红利低波</td><td class="up">+4.34%</td><td class="up">+2.97%</td><td class="up">+1.33%</td><td class="up">+7.09pp</td></tr>
+          <tr><td>中证红利</td><td class="up">+4.25%</td><td class="up">+1.88%</td><td class="up">+2.32%</td><td class="up">+7.00pp</td></tr>
+          <tr><td>深证红利</td><td class="up">+2.78%</td><td class="down">-0.18%</td><td class="up">+2.96%</td><td class="up">+5.53pp</td></tr>
+          <tr><td>沪深300</td><td class="down">-2.75%</td><td class="down">-5.26%</td><td class="up">+2.65%</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:14px">窗口采用“7月10日收盘作为基准、7月24日收盘作为终点”。第一周为7月10日→17日，第二周为7月17日→24日。</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>走势不是直线上涨：中间经历明显波动</h2>
+    <div id="pathChart" class="chart"></div>
+    <div class="callout">7月17日沪深300较7月10日累计下跌5.26%，而红利低波上涨2.97%；随后宽基反弹，但红利仍继续走高。说明行情由“纯防御避险”逐步扩展为“资源、银行、低估值价值修复”。不过7月24日上证红利单日下跌2.03%，短线获利回吐已经出现。</div>
+  </section>
+
+  <section class="section">
+    <h2>两阶段行情结构</h2>
+    <div class="phase">
+      <div class="phase-card"><strong><span class="tag tag-blue">第一周 7/13–7/17</span> 防御切换</strong><p>科技成长大幅调整，电子和通信资金拥挤度释放；红利低波、银行等稳定现金流资产成为避险承接。红利低波第一周上涨2.97%，而沪深300下跌5.26%。</p></div>
+      <div class="phase-card"><strong><span class="tag tag-red">第二周 7/20–7/24</span> 资源扩散</strong><p>石油石化、煤炭、有色等上游资源走强，深证红利也从第一周-0.18%转为第二周+2.96%。行情由低波防守扩展至资源和价值板块，但周五地缘风险与获利回吐加大波动。</p></div>
+    </div>
+  </section>
+
+  <section class="section grid2">
+    <div>
+      <h2>主要行业贡献</h2>
+      <div id="sectorChart" class="small-chart"></div>
+    </div>
+    <div>
+      <h2>核心驱动</h2>
+      <div class="drivers">
+        <div class="driver"><b>① 科技拥挤交易反转</b><p>两周内申万电子-19.41%、通信-13.18%、机械设备-16.07%；资金从高弹性成长转向低估值、现金流稳定方向。</p></div>
+        <div class="driver"><b>② 资源价格与地缘催化</b><p>石油石化+7.10%、煤炭+6.15%，直接抬升中证红利和上证红利；第二周资源品成为最强承接方向。</p></div>
+        <div class="driver"><b>③ 银行修复</b><p>银行两周上涨4.82%。中报预期、负债成本下降、高股息和股东增持共同改善银行定价，红利低波和上证红利受益较大。</p></div>
+        <div class="driver"><b>④ 国内利率仍低</b><p>10年期国债收益率由1.7398%降至1.7282%，下降1.16bp。低利率继续支持高股息资产的相对吸引力。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>估值与股债性价比：仍有优势，但安全垫正在收窄</h2>
+    <table>
+      <thead><tr><th>指数</th><th>PE（7/10→7/24）</th><th>股息率（7/10→7/24）</th><th>最新DY/10Y国债</th><th>判断</th></tr></thead>
+      <tbody>
+        <tr><td>中证红利</td><td>10.16 → 10.60</td><td>4.69% → 4.50%</td><td>2.60x</td><td><span class="tag tag-gold">仍有吸引力</span></td></tr>
+        <tr><td>上证红利</td><td>9.75 → 10.28</td><td>4.82% → 4.58%</td><td>2.65x</td><td><span class="tag tag-gold">仍有吸引力</span></td></tr>
+        <tr><td>红利低波</td><td>7.35 → 7.67</td><td>4.96% → 4.76%</td><td>2.75x</td><td><span class="tag tag-red">相对最好</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout risk" style="margin-top:14px"><strong>关键变化：</strong>三类指数的股息率都因价格上涨而下降，PE同步抬升。最新股息率/国债倍数仍高于策略中的2.5x价值线，但中证红利只剩约2.60x，继续追涨会快速消耗安全垫。</div>
+  </section>
+
+  <section class="section">
+    <h2>这轮修复到了哪一步？</h2>
+    <table>
+      <thead><tr><th>指数</th><th>3月高点→6月低点</th><th>低点→7月24日</th><th>距离3月高点</th></tr></thead>
+      <tbody>
+        <tr><td>上证红利</td><td class="down">-15.44%</td><td class="up">+9.98%</td><td class="down">-7.01%</td></tr>
+        <tr><td>红利低波</td><td class="down">-13.68%</td><td class="up">+7.85%</td><td class="down">-6.90%</td></tr>
+        <tr><td>中证红利</td><td class="down">-15.96%</td><td class="up">+7.60%</td><td class="down">-9.57%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:14px">行情已经修复了低点以来约一半至三分之二的跌幅，但仍未回到3月高点。定义上更适合称为“强修复”，还不能称为趋势完全反转。</div>
+  </section>
+
+  <section class="section">
+    <h2>未来两周的验证信号</h2>
+    <div class="signal"><div class="status status-good">继续成立</div><div>银行、煤炭、能源不依赖单一事件继续走强；红利指数回调时成交缩量，资金没有重新大幅流出。</div><div>维持正常定投</div></div>
+    <div class="signal"><div class="status status-watch">需要警惕</div><div>科技快速企稳后红利立即连续跑输；或者中证红利DY/10Y跌破2.5x，同时PE继续上升。</div><div>暂停追涨</div></div>
+    <div class="signal"><div class="status status-watch">周期风险</div><div>油价、煤价回落导致资源股获利兑现。资源股高分红依赖周期盈利，不能把事件驱动上涨当成永久分红能力。</div><div>关注现金流</div></div>
+    <div class="signal"><div class="status status-good">真正转强</div><div>科技反弹时红利仍保持相对稳定，且上涨由银行、消费、公用事业等多行业共同参与，而非仅靠油煤权重。</div><div>确认独立行情</div></div>
+  </section>
+
+  <section class="section sources">
+    <h2>数据来源与口径</h2>
+    <p>1. 指数行情：中证指数历史行情、东方财富深证红利行情，经 AkShare 获取；区间为2026-07-10收盘至2026-07-24收盘。<br>
+    2. 行业行情：申万一级行业指数，经 AkShare 获取；区间同上。<br>
+    3. 估值：中证指数估值接口，采用PE2与股息率2；数据日期2026-07-10、2026-07-17、2026-07-24。<br>
+    4. 国债收益率：中债国债收益率曲线，经 AkShare 获取；2026-07-10至2026-07-24。<br>
+    5. 驱动背景：<a href="https://cj.sina.com.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Froll%2F2026-07-24%2Fdoc-iniiwzsm1639078.shtml&finpagefr=w_110">源达策略周报 / 新浪财经（2026-07-24）</a>；<a href="https://m.10jqka.com.cn/20260724/c678397530.shtml">同花顺转载机构观点（2026-07-24，含AI摘要，需以原始研报核实）</a>。媒体与机构观点仅用于解释行情，不作为一手事实替代。</p>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    const gainColor = '#c62828';
+    const lossColor = '#17823b';
+    const returns = [
+      {name:'上证红利', value:5.42},
+      {name:'红利低波', value:4.34},
+      {name:'中证红利', value:4.25},
+      {name:'深证红利', value:2.78},
+      {name:'沪深300', value:-2.75}
+    ];
+    echarts.init(document.getElementById('returnChart')).setOption({
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'：'+p[0].value.toFixed(2)+'%';}},
+      grid:{left:90,right:30,top:20,bottom:30},
+      xAxis:{type:'value',axisLabel:{formatter:'{value}%'}},
+      yAxis:{type:'category',inverse:true,data:returns.map(function(x){return x.name;})},
+      series:[{type:'bar',data:returns.map(function(x){return {value:x.value,itemStyle:{color:x.value>=0?gainColor:lossColor}};}),label:{show:true,position:'right',formatter:'{c}%'}}]
+    });
+
+    const dates = ['07-10','07-13','07-14','07-15','07-16','07-17','07-20','07-21','07-22','07-23','07-24'];
+    const paths = {
+      '中证红利':[100.00,100.27,102.38,103.76,102.64,101.88,105.14,103.99,105.18,106.20,104.25],
+      '上证红利':[100.00,100.55,103.12,104.57,103.20,102.71,106.55,105.04,106.68,107.60,105.42],
+      '红利低波':[100.00,101.51,102.40,103.70,102.71,102.97,105.67,104.28,104.81,105.27,104.34],
+      '沪深300':[100.00,98.21,100.33,100.13,98.28,94.74,96.18,99.13,98.67,98.90,97.25]
+    };
+    echarts.init(document.getElementById('pathChart')).setOption({
+      tooltip:{trigger:'axis'},legend:{data:Object.keys(paths),top:0},grid:{left:55,right:25,top:48,bottom:45},
+      xAxis:{type:'category',boundaryGap:false,data:dates},yAxis:{type:'value',name:'7/10=100',min:93,max:109},
+      series:[
+        {name:'中证红利',type:'line',smooth:true,data:paths['中证红利'],lineStyle:{width:3,color:'#d94b4b'},itemStyle:{color:'#d94b4b'}},
+        {name:'上证红利',type:'line',smooth:true,data:paths['上证红利'],lineStyle:{width:3,color:'#9f1239'},itemStyle:{color:'#9f1239'}},
+        {name:'红利低波',type:'line',smooth:true,data:paths['红利低波'],lineStyle:{width:3,color:'#b7791f'},itemStyle:{color:'#b7791f'}},
+        {name:'沪深300',type:'line',smooth:true,data:paths['沪深300'],lineStyle:{width:2,color:'#17823b',type:'dashed'},itemStyle:{color:'#17823b'}}
+      ]
+    });
+
+    const sectors = [
+      {name:'石油石化',value:7.10},{name:'煤炭',value:6.15},{name:'银行',value:4.82},{name:'食品饮料',value:4.08},{name:'非银金融',value:1.30},{name:'公用事业',value:1.25},{name:'通信',value:-13.18},{name:'机械设备',value:-16.07},{name:'电子',value:-19.41}
+    ];
+    echarts.init(document.getElementById('sectorChart')).setOption({
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'：'+p[0].value.toFixed(2)+'%';}},
+      grid:{left:85,right:35,top:10,bottom:25},xAxis:{type:'value',axisLabel:{formatter:'{value}%'}},
+      yAxis:{type:'category',inverse:true,data:sectors.map(function(x){return x.name;})},
+      series:[{type:'bar',data:sectors.map(function(x){return {value:x.value,itemStyle:{color:x.value>=0?gainColor:lossColor}};}),label:{show:true,position:'right',formatter:'{c}%'}}]
+    });
+    window.addEventListener('resize',function(){document.querySelectorAll('.chart,.small-chart').forEach(function(el){const chart=echarts.getInstanceByDom(el);if(chart){chart.resize();}});});
+  </script>
+</div>
