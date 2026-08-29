@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>红利指数周度分析｜2026-08-28</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#e5e7eb;--paper:#f4f6f8;--card:#fff;--up:#c62828;--down:#138a52;--blue:#265d97}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.65}.wrap{max-width:1120px;margin:0 auto;padding:32px 24px 56px}.head{background:linear-gradient(135deg,#fff 0%,#eef4fb 100%);border:1px solid #d9e2ec;border-radius:18px;padding:30px}.eyebrow{font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.08em}.head h1{margin:7px 0 8px;font-size:34px;line-height:1.25}.sub{color:var(--muted);font-size:14px}.verdict{margin-top:20px;padding:15px 18px;background:#fff;border-left:5px solid var(--blue);border-radius:8px;font-weight:700}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}.card .label{color:var(--muted);font-size:13px}.card .value{font-size:26px;font-weight:800;margin:4px 0}.down{color:var(--down)}.up{color:var(--up)}.card .note{font-size:12px;color:var(--muted)}section{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:18px}h2{font-size:22px;margin:0 0 14px}h3{font-size:17px;margin:20px 0 8px}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}.chart{height:360px}.callout{background:#f7fafc;border:1px solid #dbe5ef;border-radius:12px;padding:16px}.callout strong{color:var(--blue)}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:right}th{background:#f8fafc;color:#475467;font-weight:700}th:first-child,td:first-child{text-align:left}.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}.tag-ok{background:#eaf7ef;color:#137a46}.tag-warn{background:#fff5dc;color:#8a5a00}.source{font-size:12px;color:var(--muted);margin-top:10px}.sources li{margin:6px 0}.sources a{color:var(--blue)}.disclaimer{font-size:12px;color:#596579;background:#f8fafc;border-radius:10px;padding:14px;margin-top:20px}@media(max-width:820px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.head h1{font-size:27px}}@media(max-width:520px){.cards{grid-template-columns:1fr}.wrap{padding:18px 12px 36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="head">
+<div class="eyebrow">DIVIDEND WEEKLY REVIEW</div>
+<h1>红利指数周度分析</h1>
+<div class="sub">观察窗口：2026-08-21 收盘 → 2026-08-28 收盘｜截至 2026-08-29（周六休市）</div>
+<div class="verdict">核心判断：红利连续第二周走强，但驱动结构换棒——上周靠银行，本周靠商品（煤炭+5.13%、石油石化+3.23%），银行走平。8/21触发的0.5倍机会仓信号回测有效（红利低波全周站稳20日线、周涨+0.76%），但红利低波因银行走平而跑输商品弹性更大的上证红利/中证红利。</div>
+</header>
+
+<div class="cards">
+<div class="card"><div class="label">上证红利 000015</div><div class="value up">+2.17%</div><div class="note">煤炭+石油石化驱动，全周最强</div></div>
+<div class="card"><div class="label">中证红利 000922</div><div class="value up">+2.01%</div><div class="note">周五收5691.52创近期新高</div></div>
+<div class="card"><div class="label">红利低波 H30269</div><div class="value up">+0.76%</div><div class="note">银行走平拖累，但站稳20日线</div></div>
+<div class="card"><div class="label">10Y国债收益率</div><div class="value">1.6949%</div><div class="note">周变动 +1.10bp，小幅回升需留意</div></div>
+</div>
+
+<section>
+<h2>一、本周表现：红利第二周跑赢</h2>
+<div class="grid"><div id="indexChart" class="chart"></div><div class="callout">
+<strong>口径说明</strong>
+<p>本表按本地中证指数接口重新计算（8/21收盘→8/28收盘）。检索代理返回的部分区间涨跌幅（如中证红利+3.89%、上证红利+5.15%）实为8/14→8/28两周窗口，已弃用——这也是我们坚持双源交叉验证的原因。</p>
+<p>节奏：周一（8/24）科技重挫、红利逆势领涨（中证红利+1.33%）；周四（8/27）科技反弹、银行独跌-1.04%——跷跷板仍在，但两周净方向红利占优。</p>
+</div></div>
+<table>
+<thead><tr><th>指数</th><th>代码</th><th>8/21收盘</th><th>8/28收盘</th><th>周涨跌</th></tr></thead>
+<tbody>
+<tr><td>上证红利</td><td>000015</td><td>3300.46</td><td>3372.00</td><td class="up"><b>+2.17%</b></td></tr>
+<tr><td>中证红利</td><td>000922</td><td>5579.34</td><td>5691.52</td><td class="up"><b>+2.01%</b></td></tr>
+<tr><td>红利低波</td><td>H30269</td><td>10858.77</td><td>10941.54</td><td class="up"><b>+0.76%</b></td></tr>
+<tr><td>深证红利</td><td>399324</td><td>8387.97</td><td>8351.25</td><td class="down"><b>-0.44%</b></td></tr>
+<tr><td>上证指数</td><td>000001</td><td>3905.20</td><td>3952.18</td><td class="up"><b>+1.20%</b></td></tr>
+<tr><td>沪深300</td><td>000300</td><td>4618.90</td><td>4609.18</td><td class="down"><b>-0.21%</b></td></tr>
+<tr><td>科创50</td><td>000688</td><td>1653.56</td><td>1662.15</td><td class="up"><b>+0.52%</b></td></tr>
+</tbody></table>
+<div class="source">来源：中证指数/东方财富行情接口（AkShare），2026-08-21收盘→2026-08-28收盘；深证红利取自检索汇总并经收盘价比对复核。</div>
+</section>
+
+<section>
+<h2>二、归因：商品接棒银行</h2>
+<div id="sectorChart" class="chart"></div>
+<h3>1. 商品端：煤炭成为本周第一主力</h3>
+<p>申万煤炭 <b>+5.13%</b>（全市场领涨方向之一）、石油石化 +3.23%、非银金融 +3.94%。焦煤主力合约收1629元/吨、周涨+3.00%，盘中创2024年7月以来新高（媒体口径需核实原文），8月以来累计涨超30%。焦炭+1.60%、原油SC +0.61%，商品强势延续且股价继续跟随——上周开始的"商品→股价"传导修复本周巩固。</p>
+<h3>2. 银行走平，但基本面信号在改善</h3>
+<p>申万银行本周仅 <b>+0.02%</b>，与上周+2.40%形成反差；8/27科技反弹日银行独跌-1.04%。但结构性亮点在：六大行中期分红比例由30%统一提升至31%，多只银行股8/28盘中创历史新高（媒体口径需核实原文）。银行"指数走平、个股新高"说明行情向头部集中。</p>
+<h3>3. 险资新规：中长期资金逻辑的又一次强化</h3>
+<p>8/27金融监管总局发布《保险公司资产负债管理办法》正式稿，要求人身险公司净投资收益覆盖率不低于100%——低利率下倒逼险资加大高股息配置，市场预期2028年前红利板块或迎数千亿级增量资金（券商测算，需核实原文）。</p>
+<h3>4. 一个需要留意的变化：利率不再单边下行</h3>
+<p>10Y国债本周 <b>+1.10bp</b> 至1.6949%，是近一个月首次周度回升。幅度很小、远未触及红线（2%），但"利率单边下行助推红利"的最顺阶段可能已过，后续靠利差的方向从"利率降"转向"分红稳"。</p>
+</section>
+
+<section>
+<h2>三、机会仓信号回测：有效，但有一个标的弹性教训</h2>
+<table>
+<thead><tr><th>回测项</th><th>结果</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>红利低波是否站稳20日线</td><td>全周5个交易日均在线上，周五高出+0.97%</td><td><span class="tag tag-ok">通过</span></td></tr>
+<tr><td>信号后一周收益（8/21收盘10858.77入场）</td><td>+0.76%</td><td><span class="tag tag-ok">正收益</span></td></tr>
+<tr><td>相对表现</td><td>红利低波+0.76% vs 上证红利+2.17%、中证红利+2.01%</td><td><span class="tag tag-warn">跑输同类</span></td></tr>
+</tbody></table>
+<div class="callout"><strong>教训与规则细化：</strong>三重确认用红利低波做<b>信号指标</b>是对的（防御属性最纯、风控最有效），但<b>执行标的</b>不必机械等于信号标的。本周银行走平、商品领涨，银行权重高的红利低波弹性最弱，商品暴露高的上证红利/中证红利弹性更大。细化规则：机会仓执行时看当周驱动——银行驱动选红利低波，商品驱动选中证红利/上证红利，分不清则按原组合权重分配。</div>
+</section>
+
+<section>
+<h2>四、股债性价比：价格涨+利率升，利差小幅压缩</h2>
+<table>
+<thead><tr><th>指数</th><th>PE2（8/28）</th><th>股息率（8/28）</th><th>DY/10Y</th><th>上周（8/21）</th></tr></thead>
+<tbody>
+<tr><td>中证红利 000922</td><td>11.15</td><td>4.06%</td><td>2.40x</td><td>2.46x</td></tr>
+<tr><td>上证红利 000015</td><td>11.02</td><td>3.99%</td><td>2.35x</td><td>2.42x</td></tr>
+<tr><td>红利低波 H30269</td><td>7.78</td><td>4.83%</td><td>2.85x</td><td>2.89x</td></tr>
+</tbody></table>
+<p>连续两周上涨后，中证红利/上证红利的DY/10Y继续向2.5x阈值下方收窄（价格涨幅超过利率降幅），红利低波2.85x仍保持明显安全垫。<b>注意：上证红利2.35x已接近"合理偏高"区间</b>，若利率继续回升或价格续涨，月度决策表中的"暂停定投"条件（DY/10Y 1.5-2.5x 且 PE/PB分位>50%）需要9月检查清单认真核对。</p>
+<div class="source">估值来源：中证指数官网估值接口（股息率2口径，截至2026-08-28）；国债来源：中国债券收益率曲线接口。</div>
+</section>
+
+<section>
+<h2>五、结论与下周观察</h2>
+<div class="callout"><strong>我的判断：红利的相对强势已连续两周验证，行情性质从"避险轮动"向"基本面+资金双支撑"演变（商品景气+险资新规+分红提升）。但利差在压缩、利率开始回升，性价比最舒服的阶段正在过去——继续持有不动，机会仓已触发的不再追加第二笔。</strong></div>
+<h3>下周（8/31~9/4）观察点</h3>
+<table>
+<thead><tr><th>观察信号</th><th>验证含义</th></tr></thead>
+<tbody>
+<tr><td>10Y国债是否继续回升（关注1.75%关口）</td><td>持续回升→利差压缩加速，红利估值支撑减弱（红线①预警）</td></tr>
+<tr><td>焦煤能否站稳1600上方</td><td>商品景气延续→中证红利/上证红利弹性继续</td></tr>
+<tr><td>银行个股新高后指数能否跟上</td><td>决定红利低波能否补涨、机会仓收益兑现速度</td></tr>
+<tr><td>9/1月度检查清单执行</td><td>重点核对：PE/PB分位、DY/10Y是否触发"合理偏高"档</td></tr>
+</tbody></table>
+</section>
+
+<section>
+<h2>数据来源与口径</h2>
+<ul class="sources">
+<li>指数行情、申万行业、估值、国债与期货数据：中证指数 / 东方财富 / 新浪财经接口，经 AkShare 获取（截至2026-08-28）。</li>
+<li>险资新规、银行分红比例、焦煤价格高点等资讯：上海证券报/每日经济新闻/界面新闻等公开报道（2026-08-24至08-28），非一手来源，需核实原文。</li>
+<li>口径提示：检索代理本周返回的部分"区间涨跌幅"为两周窗口（8/14→8/28），已弃用并改按本地数据重算，报告数字以本地交叉验证为准。</li>
+</ul>
+<div class="disclaimer"><b>免责声明</b>：以上内容基于公开数据和量化分析，仅供参考，不构成投资建议。市场有风险，投资需谨慎。任何投资决策应结合个人风险承受能力、资金状况和投资目标独立判断，必要时咨询持牌专业机构。过往表现不预示未来收益。</div>
+</section>
+</div>
+<script>
+const upColor='#c62828';
+const downColor='#138a52';
+function itemColor(v){return v>=0?upColor:downColor;}
+const indexNames=['上证红利','中证红利','红利低波','上证指数','科创50','沪深300','深证红利'];
+const indexData=[2.17,2.01,0.76,1.20,0.52,-0.21,-0.44];
+echarts.init(document.getElementById('indexChart')).setOption({
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'：'+p[0].value+'%';}},
+  grid:{left:80,right:28,top:20,bottom:45},
+  xAxis:{type:'category',data:indexNames,axisLabel:{rotate:25,color:'#475467'}},
+  yAxis:{type:'value',name:'周涨跌幅(%)',axisLine:{show:false},splitLine:{lineStyle:{color:'#e5e7eb'}}},
+  series:[{type:'bar',data:indexData.map(function(v){return {value:v,itemStyle:{color:itemColor(v),borderRadius:v>=0?[5,5,0,0]:[0,0,5,5]}};}),label:{show:true,position:'outside',formatter:'{c}%'}}]
+});
+const sectorNames=['煤炭','非银金融','石油石化','公用事业','食品饮料','电子','银行','医药生物','通信'];
+const sectorData=[5.13,3.94,3.23,1.70,1.14,0.15,0.02,-1.43,-3.13];
+echarts.init(document.getElementById('sectorChart')).setOption({
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:function(p){return p[0].name+'：'+p[0].value+'%';}},
+  grid:{left:82,right:35,top:24,bottom:45},
+  xAxis:{type:'category',data:sectorNames,axisLabel:{rotate:25,color:'#475467'}},
+  yAxis:{type:'value',name:'周涨跌幅(%)',splitLine:{lineStyle:{color:'#e5e7eb'}}},
+  series:[{type:'bar',data:sectorData.map(function(v){return {value:v,itemStyle:{color:itemColor(v),borderRadius:v>=0?[5,5,0,0]:[0,0,5,5]}};}),label:{show:true,position:'outside',formatter:'{c}%'}}]
+});
+window.addEventListener('resize',function(){echarts.getInstanceByDom(document.getElementById('indexChart')).resize();echarts.getInstanceByDom(document.getElementById('sectorChart')).resize();});
+</script>
+</body>
+</html>
