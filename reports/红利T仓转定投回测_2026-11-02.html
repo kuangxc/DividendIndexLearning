@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>红利T仓转定投回测 · 2026-11-02</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--ink:#1f2328;--mute:#5b6470;--line:#e3e6ea;
+--red:#c0392b;--green:#1e8449;--blue:#1f6feb;}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 20px 64px;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+line-height:1.7;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:26px;margin:0 0 6px}
+h2{font-size:19px;margin:34px 0 12px;padding-left:10px;border-left:4px solid var(--blue)}
+h3{font-size:16px;margin:22px 0 10px;color:#333}
+.sub{color:var(--mute);font-size:13px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:18px}
+.lead{background:#fff8e6;border-left:4px solid #e0a800;padding:14px 18px;border-radius:6px;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:right}
+th{background:#f0f2f5;font-weight:600;text-align:center;color:#333}
+td:first-child,td:nth-child(2){text-align:left}
+tbody tr:nth-child(even){background:#fafbfc}
+.neg{color:var(--red);font-weight:600}
+.pos{color:var(--green);font-weight:600}
+.flat{color:var(--mute);font-weight:600}
+ul{padding-left:22px;margin:10px 0}
+li{margin:6px 0}
+code{background:#f0f2f5;padding:1px 5px;border-radius:3px;font-size:13px}
+.foot{color:var(--mute);font-size:12.5px;margin-top:28px;border-top:1px solid var(--line);padding-top:14px}
+</style></head><body><div class="wrap">
+<h1>定投日把盈利 T 仓转为定投资金，是否更赚？</h1>
+<div class="sub">样本 2021-11-01 至 2026-10-30 · 60 期定投 · 中证红利 515180 与红利低波 512890 · 生成于 2026-11-02 10:00:55</div>
+
+<div class="card lead">
+<b>结论：在可比的同一笔现金流下，转定投平均略微更差。</b>
+中证红利期末总资产 83.53 对 83.88（差 −0.35 单位，累计外部注入 72 单位），资金加权年化 5.06% 对 5.20%；
+红利低波 88.24 对 88.58（差 −0.34），6.94% 对 7.07%。差距小但方向一致，10 组参数变体没有任何一组反超。
+</div>
+
+<div class="card">
+<h3>两个方案怎么比的</h3>
+<p>T 仓规则沿用此前确认的研究参数：10 个交易日累计跌 5% 首次下穿触发首笔；之后相对上一笔实际成交价再跌 5% 追加；
+每笔等额本金；每笔按自己的成交价 ×1.10 独立退出；分红不计入那 10% 的价格涨幅。</p>
+<ul>
+<li><b>方案 A（严格）</b>：定投永远用当期新现金，T 仓独立等 +10%。</li>
+<li><b>方案 B（转定投）</b>：定投日若手上 T 仓有盈利的笔，按当日价格切出<b>市值等于本期定投额</b>的份额转入底仓，本期不再投入现金；若全部亏损或没有 T 仓持仓，照常用新现金定投。</li>
+</ul>
+<p>两个方案的外部注入完全相同：初始弹药 12 单位 + 每月 1 单位，共 72 单位。因此期末总资产可以直接比较，不存在"一个投入更多"的口径问题。</p>
+</div>
+
+<h2>一、主口径结果</h2>
+<h3>主口径：每笔 1 单位、弹药 12 单位、月初定投、限价成交</h3>
+<table><thead><tr><th>标的</th><th>变体</th><th>A严格 期末</th><th>B转定投 期末</th><th>差额</th><th>A年化</th><th>B年化</th><th>转换次数</th><th>转换时盈利均值</th><th>剩余空间</th><th>错过买入 A/B</th></tr></thead><tbody>
+<tr><td>中证红利 515180</td><td>主口径（每笔1单位、弹药12、月初定投、限价成交）</td><td>83.88</td><td>83.53</td><td class='neg'>-0.346</td><td>5.20%</td><td>5.06%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>主口径（每笔1单位、弹药12、月初定投、限价成交）</td><td>88.58</td><td>88.24</td><td class='neg'>-0.342</td><td>7.07%</td><td>6.94%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+</tbody></table>
+
+<div class="card">
+<h3>为什么更差</h3>
+<ul>
+<li>转换发生在盈利很浅的位置：中证中位 2.48%、低波中位 1.23%，却放弃了平均约 7 个百分点才会到 +10% 的剩余空间。</li>
+<li>而这段历史里，被切走的仓位如果留在 T 仓，中证 84.6%、低波 100% 最终都涨到了 +10%。</li>
+<li>换来的是 1 单位现金：主口径按 0 收益计息；就算给闲置现金 1.5% 年化，差距也只从 −0.35 收窄到 −0.29。</li>
+<li><b>副作用</b>：转走会清空该笔 T 仓，等于提前结束一个循环，新的"跌 5% 首笔"信号又能触发——B 实际买入 15 笔（A 为 9 笔），低波 9 笔（A 为 8 笔）。它不是"少花一次钱"，而是把省下的现金又变成更多笔 T 仓，且大多在盈利很浅时再被切走。</li>
+</ul>
+</div>
+
+<h2>二、转换门槛：决定盈亏的关键旋钮</h2>
+<h3>同样是&quot;盈利就转&quot;，门槛设在哪里</h3>
+<table><thead><tr><th>标的</th><th>变体</th><th>A严格 期末</th><th>B转定投 期末</th><th>差额</th><th>A年化</th><th>B年化</th><th>转换次数</th><th>转换时盈利均值</th><th>剩余空间</th><th>错过买入 A/B</th></tr></thead><tbody>
+<tr><td>中证红利 515180</td><td>主口径（每笔1单位、弹药12、月初定投、限价成交）</td><td>83.88</td><td>83.53</td><td class='neg'>-0.346</td><td>5.20%</td><td>5.06%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>只在盈利≥5%时转</td><td>83.88</td><td>83.79</td><td class='neg'>-0.090</td><td>5.20%</td><td>5.17%</td><td>10</td><td>6.72% (中位6.27%)</td><td>3.09%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>只在盈利≥8%时转</td><td>83.88</td><td>83.89</td><td class='pos'>+0.009</td><td>5.20%</td><td>5.21%</td><td>3</td><td>9.14% (中位9.44%)</td><td>0.79%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>主口径（每笔1单位、弹药12、月初定投、限价成交）</td><td>88.58</td><td>88.24</td><td class='neg'>-0.342</td><td>7.07%</td><td>6.94%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>只在盈利≥5%时转</td><td>88.58</td><td>88.53</td><td class='neg'>-0.051</td><td>7.07%</td><td>7.05%</td><td>6</td><td>6.86% (中位6.84%)</td><td>2.95%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>只在盈利≥8%时转</td><td>88.58</td><td>88.57</td><td class='neg'>-0.012</td><td>7.07%</td><td>7.07%</td><td>1</td><td>8.74% (中位8.74%)</td><td>1.16%</td><td>0 / 0</td></tr>
+</tbody></table>
+<div class="card">
+<ul>
+<li>只要盈利就转：中证差 −0.35，转换 21 次。</li>
+<li>盈利 ≥5% 才转：差收窄到 −0.09，转换 10 次。</li>
+<li>盈利 ≥8% 才转：差 +0.009，基本持平，因为剩余空间只剩 1~2%。</li>
+</ul>
+<p><b>可操作含义</b>：若要用这个模式，只在 T 仓已接近 +10% 时切转；盈利 2~3% 就转走是最亏的情形。</p>
+</div>
+
+<h2>三、其余参数变体（方向一致）</h2>
+<h3>弹药规模、每笔金额、现金收益、定投日、成交价与转换顺序</h3>
+<table><thead><tr><th>标的</th><th>变体</th><th>A严格 期末</th><th>B转定投 期末</th><th>差额</th><th>A年化</th><th>B年化</th><th>转换次数</th><th>转换时盈利均值</th><th>剩余空间</th><th>错过买入 A/B</th></tr></thead><tbody>
+<tr><td>中证红利 515180</td><td>弹药降到6单位</td><td>77.88</td><td>77.53</td><td class='neg'>-0.346</td><td>6.03%</td><td>5.86%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>弹药24单位</td><td>95.88</td><td>95.53</td><td class='neg'>-0.346</td><td>4.10%</td><td>3.99%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>弹药近乎无限</td><td>10071.88</td><td>10071.53</td><td class='neg'>-0.346</td><td>0.02%</td><td>0.02%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>每笔2单位</td><td>84.87</td><td>84.44</td><td class='neg'>-0.433</td><td>5.61%</td><td>5.43%</td><td>30</td><td>3.96% (中位3.81%)</td><td>5.88%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>闲置现金按1.5%年化计息</td><td>84.89</td><td>84.60</td><td class='neg'>-0.294</td><td>5.61%</td><td>5.50%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>定投改在每月最后交易日</td><td>83.82</td><td>83.53</td><td class='neg'>-0.290</td><td>5.29%</td><td>5.17%</td><td>22</td><td>3.36% (中位2.74%)</td><td>6.49%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>T仓按收盘价而非限价成交</td><td>83.98</td><td>83.56</td><td class='neg'>-0.424</td><td>5.25%</td><td>5.07%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>优先转盈利最低的笔</td><td>83.88</td><td>83.53</td><td class='neg'>-0.346</td><td>5.20%</td><td>5.06%</td><td>21</td><td>2.93% (中位2.48%)</td><td>6.93%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>每笔3单位</td><td>85.86</td><td>85.13</td><td class='neg'>-0.731</td><td>6.01%</td><td>5.71%</td><td>29</td><td>4.01% (中位4.19%)</td><td>5.82%</td><td>0 / 0</td></tr>
+<tr><td>中证红利 515180</td><td>弹药2单位、每笔2单位</td><td>74.46</td><td>74.17</td><td class='neg'>-0.282</td><td>7.05%</td><td>6.90%</td><td>25</td><td>3.35% (中位2.96%)</td><td>6.50%</td><td>24 / 20</td></tr>
+<tr><td>中证红利 515180</td><td>弹药3单位、每笔3单位</td><td>76.03</td><td>75.87</td><td class='neg'>-0.156</td><td>7.13%</td><td>7.05%</td><td>29</td><td>4.17% (中位4.71%)</td><td>5.66%</td><td>24 / 19</td></tr>
+<tr><td>中证红利 515180</td><td>弹药5单位、每笔5单位</td><td>78.85</td><td>78.49</td><td class='neg'>-0.365</td><td>7.13%</td><td>6.96%</td><td>27</td><td>3.85% (中位3.52%)</td><td>5.98%</td><td>35 / 22</td></tr>
+<tr><td>红利低波 512890</td><td>弹药降到6单位</td><td>82.58</td><td>82.24</td><td class='neg'>-0.342</td><td>8.17%</td><td>8.02%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>弹药24单位</td><td>100.58</td><td>100.24</td><td class='neg'>-0.342</td><td>5.59%</td><td>5.48%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>弹药近乎无限</td><td>10076.58</td><td>10076.24</td><td class='neg'>-0.342</td><td>0.03%</td><td>0.03%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>每笔2单位</td><td>89.38</td><td>88.86</td><td class='neg'>-0.514</td><td>7.38%</td><td>7.18%</td><td>14</td><td>3.18% (中位2.60%)</td><td>6.68%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>闲置现金按1.5%年化计息</td><td>89.47</td><td>89.15</td><td class='neg'>-0.328</td><td>7.42%</td><td>7.29%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>定投改在每月最后交易日</td><td>88.33</td><td>88.13</td><td class='neg'>-0.197</td><td>7.12%</td><td>7.04%</td><td>10</td><td>4.12% (中位4.06%)</td><td>5.72%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>T仓按收盘价而非限价成交</td><td>88.71</td><td>88.33</td><td class='neg'>-0.382</td><td>7.12%</td><td>6.98%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>优先转盈利最低的笔</td><td>88.58</td><td>88.24</td><td class='neg'>-0.342</td><td>7.07%</td><td>6.94%</td><td>10</td><td>2.83% (中位1.23%)</td><td>7.05%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>每笔3单位</td><td>90.18</td><td>89.52</td><td class='neg'>-0.657</td><td>7.69%</td><td>7.44%</td><td>18</td><td>3.29% (中位3.18%)</td><td>6.56%</td><td>0 / 0</td></tr>
+<tr><td>红利低波 512890</td><td>弹药2单位、每笔2单位</td><td>79.18</td><td>78.75</td><td class='neg'>-0.424</td><td>9.43%</td><td>9.22%</td><td>13</td><td>3.35% (中位3.69%)</td><td>6.50%</td><td>10 / 10</td></tr>
+<tr><td>红利低波 512890</td><td>弹药3单位、每笔3单位</td><td>80.88</td><td>80.31</td><td class='neg'>-0.568</td><td>9.49%</td><td>9.22%</td><td>17</td><td>3.43% (中位3.20%)</td><td>6.41%</td><td>10 / 10</td></tr>
+<tr><td>红利低波 512890</td><td>弹药5单位、每笔5单位</td><td>84.28</td><td>83.10</td><td class='neg'>-1.178</td><td>9.61%</td><td>9.08%</td><td>19</td><td>3.64% (中位3.20%)</td><td>6.20%</td><td>10 / 10</td></tr>
+</tbody></table>
+
+<h2>四、数据核验</h2>
+<div class="card">
+<table><thead><tr><th>标的</th><th>交易日</th><th>区间</th><th>分红核验</th><th>份额拆分</th><th>剔除的非交易占位行</th></tr></thead>
+<tbody><tr><td>中证红利 515180</td><td>1653</td><td>2020-01-02 → 2026-10-30</td><td>7 次，合计每份 0.3930 元，与官方登记逐日核对一致</td><td>无</td><td>3</td></tr>
+<tr><td>红利低波 512890</td><td>1653</td><td>2020-01-02 → 2026-10-30</td><td>0 次，合计每份 0.0000 元，与官方登记逐日核对一致</td><td>{'2021-10-22': 1.9999611097225694}</td><td>3</td></tr></tbody></table>
+<ul>
+<li>净值来自天天基金 F10 历史净值接口，分页抓取并保留每页响应哈希；两只基金各 1653 个交易日。</li>
+<li>515180 的 7 次分红（2020~2026 每年 10 月中下旬，每份 0.044~0.063 元）与官方分红送配登记的除息日和金额逐笔对上。</li>
+<li>512890 无分红，2021-10-22 有 2:1 份额拆分，位于研究起点之前，不影响持仓份额与目标价。</li>
+<li>3 个半年度／年度占位行（净值重复、涨幅为 0）已剔除。</li>
+</ul>
+</div>
+
+<h2>五、边界：这份回测不能说明什么</h2>
+<div class="card">
+<ul>
+<li>样本极小：T 仓只有 9 笔（中证）与 8 笔（低波），转换 21 次与 10 次，且集中在 2022—2026 这一段行情，不构成未来概率。</li>
+<li>用基金单位净值代替场内报价，未计折溢价、佣金与冲击成本。</li>
+<li>分红按官方除息日以现金计入，且不计入那 10% 的价格目标——这符合用户口径，但也意味着分红会让价格目标更难达到。</li>
+<li>资金真的紧张时（弹药仅够 1 笔）B 少错过部分追加（每笔 5 单位时 A 错过 35 笔、B 错过 22 笔），期末仍略差，因为历史上这些追加最终都涨到了 +10%。</li>
+<li>所有变体都是同一段历史路径的重跑，不是 independent 样本。</li>
+</ul>
+</div>
+
+<div class="foot">
+本报告为机制对照，不构成投资建议，也不改动 2026-10-22 那笔 515180 的 +10% 退出计划、实际持仓、定投额与配比。
+</div>
+</div></body></html>
