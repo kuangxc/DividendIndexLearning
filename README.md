@@ -35,9 +35,14 @@
 │   ├── dividend_yield_trend.png
 │   ├── dy_bond_spread.png
 │   └── latest_valuation_summary.png
-└── notes/                # 每日碎片记录与复盘
-    └── YYYY-MM-DD.md
+├── reports/               # 红利周复盘图表页
+├── notes/                # 每日碎片记录与复盘
+│   └── YYYY-MM-DD.md
+└── research/              # 非红利主线的投资学习研究（独立归档，不参与红利策略）
+    └── 比特币行情与情景推演_2026-11-27.html / .md
 ```
+
+`research/` 收纳与红利指数主线无关、但值得留档的投资学习研究（如跨资产研究）。该分区不进入红利决策手册，不据此调整持仓、定投或策略规则。
 
 ---
 
